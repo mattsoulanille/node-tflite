@@ -4,20 +4,24 @@ import { createCanvas, loadImage } from "canvas";
 import { Interpreter } from "../";
 
 const modelPath = path.resolve(__dirname, "mobilenet_v1_1.0_224_quant.tflite");
+const coralModelPath = path.resolve(__dirname, "mobilenet_v2_1.0_224_inat_bird_quant_edgetpu.tflite");
 const labelsPath = path.resolve(__dirname, "labels_mobilenet_quant_v1_224.txt");
+const birdLabelsPath = path.resolve(__dirname, "inat_bird_labels.txt");
 const imagePath = path.resolve(__dirname, "dog.png");
+const parrotImagePath = path.resolve(__dirname, "parrot.jpg");
 
 const labels = fs.readFileSync(labelsPath, { encoding: "utf-8" }).split("\n");
+const birdLabels = fs.readFileSync(birdLabelsPath, { encoding: "utf-8" }).split("\n");
 
 function createInterpreter() {
   const modelData = fs.readFileSync(modelPath);
   return new Interpreter(modelData);
 }
 
-async function getImageInput(size: number) {
+async function getImageInput(size: number, path = imagePath) {
   const canvas = createCanvas(size, size);
   const context = canvas.getContext("2d");
-  const image = await loadImage(imagePath);
+  const image = await loadImage(path);
   context.drawImage(image, 0, 0, size, size);
   const data = context.getImageData(0, 0, size, size);
 
@@ -75,6 +79,24 @@ describe("Interpreter", () => {
 
       const maxIndex = outputData.indexOf(Math.max(...Array.from(outputData)));
       expect(labels[maxIndex]).toBe("otterhound");
+    });
+  });
+  describe("coral delegate", () => {
+    test.only("runs model", async () => {
+      const modelData = fs.readFileSync(coralModelPath);
+      const interpreter = new Interpreter(modelData, { useCoral: true });
+      interpreter.allocateTensors();
+
+      const inputData = await getImageInput(224, parrotImagePath);
+      interpreter.inputs[0].copyFrom(inputData);
+
+      interpreter.invoke();
+
+      const outputData = new Uint8Array(965);
+      interpreter.outputs[0].copyTo(outputData);
+
+      const maxIndex = outputData.indexOf(Math.max(...Array.from(outputData)));
+      expect(birdLabels[maxIndex]).toBe("Ara macao (Scarlet Macaw)");
     });
   });
 });

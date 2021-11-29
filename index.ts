@@ -18,6 +18,7 @@ export type Type = typeof types[number];
 
 export interface InterpreterOptions {
   numThreads?: number;
+  useCoral?: boolean;
 }
 
 export class Interpreter {
@@ -116,7 +117,7 @@ export class Tensor {
 
   copyTo(data: ArrayBufferView) {
     if (this.byteSize != data.buffer.byteLength) {
-      throw new Error("data size does not match");
+      throw new Error(`data size ${this.byteSize} does not match expected ${data.buffer.byteLength}`);
     }
     if (!this.interpreter.allocated) {
       throw new Error(

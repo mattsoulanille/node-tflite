@@ -1,6 +1,8 @@
-export declare type Type = "NoType" | "Float32" | "Int32" | "UInt8" | "Int64" | "String" | "Bool" | "Int16" | "Complex64" | "Int8" | "Float16";
+declare const types: readonly ["NoType", "Float32", "Int32", "UInt8", "Int64", "String", "Bool", "Int16", "Complex64", "Int8", "Float16"];
+export declare type Type = typeof types[number];
 export interface InterpreterOptions {
     numThreads?: number;
+    useCoral?: boolean;
 }
 export declare class Interpreter {
     private _interpreter;
@@ -25,3 +27,4 @@ export declare class Tensor {
     copyFrom(data: ArrayBufferView): void;
     copyTo(data: ArrayBufferView): void;
 }
+export {};

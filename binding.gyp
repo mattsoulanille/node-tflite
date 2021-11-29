@@ -31,6 +31,7 @@
                 ['OS=="linux"', {
                      "libraries": [
                         "<(module_root_dir)/tflite/linux_x86_64/libtensorflowlite_c.so",
+                        "<(module_root_dir)/edgetpu_runtime/libedgetpu/throttled/k8/libedgetpu.so.1",
                         "-Wl,-rpath,\$$ORIGIN"
                     ],
                     "copies":[{

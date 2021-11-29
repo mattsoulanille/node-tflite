@@ -1,11 +1,12 @@
 #include "tensorflow/lite/c/c_api.h"
+#include "edgetpu_runtime/libedgetpu/edgetpu_c.h"
 #include <napi.h>
+#include <cassert>
 
 class Tensor : public Napi::ObjectWrap<Tensor> {
 public:
   static Napi::Object Init(Napi::Env env, Napi::Object exports) {
     Napi::HandleScope scope(env);
-
     Napi::Function func = DefineClass(
         env, "Tensor",
         {
@@ -120,6 +121,37 @@ public:
     auto options = TfLiteInterpreterOptionsCreate();
     if (0 < numThreads) {
       TfLiteInterpreterOptionsSetNumThreads(options, numThreads);
+    }
+
+    if ($options.Has("useCoral") &&
+        $options.Get("useCoral").As<Napi::Boolean>().Value()) {
+
+      // Get the first available coral device
+      size_t num_devices;
+      std::unique_ptr<edgetpu_device, decltype(&edgetpu_free_devices)> devices(
+          edgetpu_list_devices(&num_devices), &edgetpu_free_devices);
+
+      assert(num_devices > 0);
+      const auto& device = devices.get()[0];
+
+      auto* delegate =
+          edgetpu_create_delegate(device.type, device.path, nullptr, 0);
+      //interpreter->ModifyGraphWithDelegate({delegate, edgetpu_free_delegate});
+
+      // edgetpu_list_devices(size_t *num_devices)
+      // const struct edgetpu_option options = {
+      // name: "coral device name",
+      // value: "
+      
+      // };
+      // TfLiteDelegate* coralDelegate =
+      //   edgetpu_create_delegate(edgetpu_device_type.EDGETPU_APEX_USB,
+      //                           "coral device",
+      //                           const struct edgetpu_option *options, size_t num_options)
+                                                              
+      //auto coralDelegate = TfLiteDelegateCreate();
+      
+      TfLiteInterpreterOptionsAddDelegate(options, delegate);
     }
 
     _modelData = std::vector<uint8_t>($buffer.Data(), $buffer.Data() + $buffer.Length());

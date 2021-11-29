@@ -120,7 +120,7 @@ var Tensor = /** @class */ (function () {
     };
     Tensor.prototype.copyTo = function (data) {
         if (this.byteSize != data.buffer.byteLength) {
-            throw new Error("data size does not match");
+            throw new Error("data size " + this.byteSize + " does not match expected " + data.buffer.byteLength);
         }
         if (!this.interpreter.allocated) {
             throw new Error("Tensor is not yet allocated. Call allocateTensors() before calling copyTo().");
