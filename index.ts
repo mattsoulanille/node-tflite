@@ -105,7 +105,7 @@ export class Tensor {
 
   copyFrom(data: ArrayBufferView) {
     if (this.byteSize != data.buffer.byteLength) {
-      throw new Error("data size does not match");
+      throw new Error(`Can not copy data of size ${data.buffer.byteLength} to tensor of size ${this.byteSize}`);
     }
     if (!this.interpreter.allocated) {
       throw new Error(
@@ -117,7 +117,7 @@ export class Tensor {
 
   copyTo(data: ArrayBufferView) {
     if (this.byteSize != data.buffer.byteLength) {
-      throw new Error(`data size ${this.byteSize} does not match expected ${data.buffer.byteLength}`);
+      throw new Error(`Can not copy tensor of size ${this.byteSize} into array of size ${data.buffer.byteLength}`);
     }
     if (!this.interpreter.allocated) {
       throw new Error(

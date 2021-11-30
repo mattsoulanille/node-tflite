@@ -8,7 +8,7 @@ const coralModelPath = path.resolve(__dirname, "mobilenet_v2_1.0_224_inat_bird_q
 const labelsPath = path.resolve(__dirname, "labels_mobilenet_quant_v1_224.txt");
 const birdLabelsPath = path.resolve(__dirname, "inat_bird_labels.txt");
 const imagePath = path.resolve(__dirname, "dog.png");
-const parrotImagePath = path.resolve(__dirname, "parrot.jpg");
+const parrotImagePath = path.resolve(__dirname, "parrot.png");
 
 const labels = fs.readFileSync(labelsPath, { encoding: "utf-8" }).split("\n");
 const birdLabels = fs.readFileSync(birdLabelsPath, { encoding: "utf-8" }).split("\n");

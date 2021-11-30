@@ -49,12 +49,13 @@ type Box = [number, number, number, number]; // left, top, right, bottom
 
 class FaceDetector {
   private inputSize = 128;
+  //private inputSize = 256;
   private inputCanvas: HTMLCanvasElement;
   private inputContext: CanvasRenderingContext2D;
   private interpreter: Interpreter;
   private anchors = this.generateAnchors(this.inputSize, this.inputSize);
 
-  constructor() {
+  constructor(private readonly coral = true) {
     this.inputCanvas = document.createElement("canvas");
     this.inputCanvas.width = this.inputSize;
     this.inputCanvas.height = this.inputSize;
@@ -62,17 +63,19 @@ class FaceDetector {
 
     const faceModelPath = path.resolve(
       __dirname,
-      "face_detection_front.tflite"
+      coral ? "face-detector-quantized_edgetpu.tflite"
+        : "face_detection_front.tflite"
     );
-    this.interpreter = new Interpreter(fs.readFileSync(faceModelPath));
+    this.interpreter = new Interpreter(fs.readFileSync(faceModelPath), { useCoral: coral });
     this.interpreter.allocateTensors();
   }
 
   detect(input: CanvasImageSource): Box | undefined {
     this.inputContext.drawImage(input, 0, 0, this.inputSize, this.inputSize);
-    const rgbFloat = canvasToRGBFloat(this.inputContext);
 
-    this.interpreter.inputs[0].copyFrom(rgbFloat);
+    const rgbArray = (this.coral ? canvasToRGBUint8 : canvasToRGBFloat)(this.inputContext);
+
+    this.interpreter.inputs[0].copyFrom(rgbArray);
     this.interpreter.invoke();
 
     const coordinatesData = new Float32Array(this.anchors.length * 16);
@@ -139,6 +142,21 @@ class FaceDetector {
 
     return anchors;
   }
+}
+
+function canvasToRGBUint8(context: CanvasRenderingContext2D) {
+  const { width, height } = context.canvas;
+  const data = context.getImageData(0, 0, width, height);
+
+  const rgbUint8 = new Uint8Array(width * height * 3);
+
+  for (let i = 0; i < width * height; ++i) {
+    rgbUint8[i * 3] = data.data[i * 4];
+    rgbUint8[i * 3 + 1] = data.data[i * 4 + 1];
+    rgbUint8[i * 3 + 2] = data.data[i * 4 + 2];
+  }
+
+  return rgbUint8;
 }
 
 function canvasToRGBFloat(context: CanvasRenderingContext2D) {

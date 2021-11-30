@@ -13,12 +13,13 @@
             "conditions": [
                 ['OS=="mac"', {
                     "libraries": [
-                        "<(module_root_dir)/tflite/osx_x86_64/libtensorflowlite_c.dylib",
+                        "<(module_root_dir)/tflite/osx_arm64/libtensorflowlite_c.dylib",
+                        "<(module_root_dir)/edgetpu_runtime/libedgetpu/throttled/darwin/libedgetpu.1.dylib",
                         "-Wl,-rpath,@loader_path"
                     ],
                     "copies":[{
                         "destination": "./build/Release",
-                        "files": ["<(module_root_dir)/tflite/osx_x86_64/libtensorflowlite_c.dylib"],
+                        "files": ["<(module_root_dir)/tflite/osx_arm64/libtensorflowlite_c.dylib"],
                     }],
                 }],
                 ['OS=="win"', {
